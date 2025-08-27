@@ -1,18 +1,22 @@
 import { test, expect } from '@playwright/test';
+import { HomePage } from '../pages/HomePage';
 
-test('has title', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+test.describe('Trade Nation Home Page', () => {
+  test('Click on the Trade Nation logo at the top of the page', async ({ page }) => {
+    const home = new HomePage(page);
+    await home.gotoForexMarkets();
+    await home.acceptCookiesIfVisible();
+    await home.clickTradeNationLogo();
+    // Optionally, check navigation or print the new URL
+    console.log('URL after clicking logo:', await page.url());
+  });
 
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Playwright/);
-});
-
-test('get started link', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
-
-  // Click the get started link.
-  await page.getByRole('link', { name: 'Get started' }).click();
-
-  // Expects page to have a heading with the name of Installation.
-  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+  test('Confirm current page title', async ({ page }) => {
+    const home = new HomePage(page);
+    await home.gotoForexMarkets();
+    await home.acceptCookiesIfVisible();
+    const title = await page.title();
+    console.log('Current Page Title:', title);
+    expect(title).not.toBe('');
+  });
 });
