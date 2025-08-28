@@ -2,21 +2,26 @@ import { test, expect } from '@playwright/test';
 import { HomePage } from '../pages/HomePage';
 
 test.describe('Trade Nation Home Page', () => {
-  test('Click on the Trade Nation logo at the top of the page', async ({ page }) => {
+  test('Logo goes to site home (any locale)', async ({ page }) => {
     const home = new HomePage(page);
+
     await home.gotoForexMarkets();
     await home.acceptCookiesIfVisible();
-    await home.clickTradeNationLogo();
-    // Optionally, check navigation or print the new URL
-    console.log('URL after clicking logo:', await page.url());
+
+    // Click + wait atomically to avoid flakiness
+    await Promise.all([
+      page.waitForURL(/https:\/\/tradenation\.com\/en-[a-z]{2}\/?.*/, { timeout: 15000 }),
+      home.clickTradeNationLogo(),
+    ]);
+
+    // Optional: sanity check on title
+    await expect(page).toHaveTitle(/trade nation/i);
   });
 
-  test('Confirm current page title', async ({ page }) => {
+  test('Page has a non-empty title on Forex Markets', async ({ page }) => {
     const home = new HomePage(page);
     await home.gotoForexMarkets();
     await home.acceptCookiesIfVisible();
-    const title = await page.title();
-    console.log('Current Page Title:', title);
-    expect(title).not.toBe('');
+    await expect(page).toHaveTitle(/.+/); // non-empty
   });
 });

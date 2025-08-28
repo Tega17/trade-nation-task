@@ -25,8 +25,6 @@ export default defineConfig({
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://tradenation.com',
     viewport: {width: 1280, height: 800},
     screenshot: 'only-on-failure',
   video: 'retain-on-failure',
@@ -36,8 +34,6 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     // In your test or in the 'use' section of playwright.config.ts
-    locale: 'en-GB',
-   userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', // Set user agent
   },
 
   /* Configure projects for major browsers */

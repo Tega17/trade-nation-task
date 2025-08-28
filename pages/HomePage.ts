@@ -1,36 +1,37 @@
-import { Page } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
 
 export class HomePage {
   constructor(private page: Page) {}
 
   async gotoForexMarkets() {
-    await this.page.goto('https://tradenation.com/en-gb/markets/#forex', { waitUntil: 'domcontentloaded' });
+    await this.page.goto('https://tradenation.com/en-bs/markets/#forex', { waitUntil: 'domcontentloaded' });
   }
 
   async acceptCookiesIfVisible() {
-    const acceptButton = this.page.getByRole('button', { name: /accept all cookies/i });
-    if (await acceptButton.isVisible().catch(() => false)) {
-      await acceptButton.click();
-    }
+    const button = this.page.getByRole('button', { name: /(accept|agree).*(cookies)?/i });
+    try {
+      if (await button.isVisible()) await button.click();
+    } catch {}
   }
 
- async clickTradeNationLogo() {
-  // Wait for the logo link (parent <a> of the logo <img>) to be visible
-  const logoLink = this.page.locator('a:has(img[src*="TN-PrimaryLogo-RGB-WhiteText-Strapline.png"])').first();
-  await logoLink.waitFor({ state: 'visible', timeout: 10000 });
-
-  if (await logoLink.isVisible().catch(() => false)) {
+  async clickTradeNationLogo() {
+    const logoLink = this.page
+      .locator('a[data-testid="logo"], a:has(img[alt*="Trade Nation" i]), a[aria-label*="logo" i]')
+      .first();
+    await expect(logoLink).toBeVisible({ timeout: 10000 });
     await logoLink.click();
-  } else {
-    throw new Error('Trade Nation logo link not found or not visible');
+  }
+
+  async clickTradeNationLogoAndWait(expectedUrl: RegExp, timeout = 15000) {
+    const logoLink = this.page
+      .locator('a[data-testid="logo"], a:has(img[alt*="Trade Nation" i]), a[aria-label*="logo" i]')
+      .first();
+    await expect(logoLink).toBeVisible({ timeout: 10000 });
+
+    await Promise.all([
+      this.page.waitForURL(expectedUrl, { timeout }),
+      logoLink.click(),
+    ]);
   }
 }
 
-  async assertHomePageTitle() {
-  await this.page.waitForFunction(
-    () => document.title.includes('Trade Nation'),
-    null,
-    { timeout: 15000 }
-  );
-}
-}
