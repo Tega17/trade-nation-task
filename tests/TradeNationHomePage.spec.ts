@@ -24,5 +24,9 @@ await expect(page).toHaveTitle(/trade nation/i);
     await home.gotoForexMarkets();
     await home.acceptCookiesIfVisible();
     await expect(page).toHaveTitle(/.+/); // non-empty
+
+    // Log the actual title
+  const title = await page.title();
+  console.log(`Current page title: ${title}`);
   });
 });
