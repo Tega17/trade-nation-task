@@ -20,12 +20,16 @@ export class GoogleAuthPage {
   get wrongPasswordError(): Locator {
     return this.page.getByText(/wrong password|incorrect password|try again/i);
   }
-  // Early blockers CI often sees
-  get earlyBlocker(): Locator {
-    return this.page.getByText(
+ 
+// AFTER ✅
+get earlyBlocker(): Locator {
+  return this.page
+    .getByText(
       /couldn’t sign you in|couldn't sign you in|this browser or app may not be secure|try again later/i
-    );
-  }
+    )
+    .first();
+}
+
 
   static async acquireAfterClick(basePage: Page, click: () => Promise<void>): Promise<Page> {
     const ctx = basePage.context();

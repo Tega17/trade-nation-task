@@ -18,7 +18,7 @@ test('Valid email + invalid password shows Google validation', async ({ page }) 
   if (result === 'wrong_password') {
     // Normal path: we reached password step and saw wrong-password validation
     await expect(google.wrongPasswordError).toBeVisible();
-    console.log('Google sign-in reached password step and showed wrong-password error as expected.');
+    console.log('Wrong password. Try again or click Forgot password to reset it.');
   } else {
     // CI path: Google blocked before password — still a failed login, acceptable in CI
     await expect(google.earlyBlocker).toBeVisible();
