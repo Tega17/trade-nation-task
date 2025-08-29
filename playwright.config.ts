@@ -31,6 +31,8 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   video: 'retain-on-failure',
     headless: true,
+    locale: 'en-GB',
+    launchOptions: { args: ['--lang=en-GB'] },
 
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */

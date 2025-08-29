@@ -1,26 +1,40 @@
-import { test } from '@playwright/test';
-import { mainPage } from '../pages/mainPage';
-import { LoginPage } from '../pages/loginPage';
-import { GoogleSignInPage } from '../pages/googleSignPage';
+import { test, expect } from '@playwright/test';
+import { FirstPage} from '../pages/FirstPage';
+// If you actually use these, keep them; otherwise remove to avoid TS lint errors.
+import { LoginPage} from '../pages/LoginPage';
+import { GoogleSignInPage} from '../pages/GoogleSignPage';
 
-test.describe.configure({ mode: 'serial' }); // keeps the auth flow tidy
+test.describe.configure({ mode: 'serial' });
 
-test('Invalid Google login shows validation', async ({ page, context }) => {
-  const home = new mainPage(page);
-  await home.open();                          // go to home
-  await home.clickSignUpOrLogin();            // click top "Sign up / Log in"
+test('Invalid Google login shows validation', async ({ page }) => {
+  const mainPage = new FirstPage(page);
 
-  const login = new LoginPage(page);
-  await login.clickLoginHere();               // click "log in here"
+  // Open your site and bring up the auth options
+  await mainPage.goto();
+  await mainPage.clickSignUpOrLogin();
 
-  // ensure we're on the /login page explicitly if needed
-  await page.goto('https://tradenation.com/login', { waitUntil: 'domcontentloaded' });
+  // Click "Continue with Google" and capture the popup
+  const [google] = await Promise.all([
+    page.waitForEvent('popup'), // or: context.waitForEvent('page')
+    page.getByRole('button', { name: /google/i }).click(),
+  ]);
 
-  const googlePopup = await login.clickLoginWithGoogle(context);   // click "Log in with Google"
+  await google.waitForLoadState('domcontentloaded');
+  await expect(google).toHaveURL(/accounts\.google\.com/);
 
-  const google = new GoogleSignInPage(googlePopup);
-  await google.enterEmail('tegaenajekpo50@gmail.com');             // any non-existent email is fine
-  await google.enterInvalidPassword('definitely-wrong-password');  // invalid pass
-  await google.expectInvalidPasswordAndLog();                      // assert + log the message
+  // Email step
+  await google.getByRole('textbox', { name: /email|phone/i }).fill('invalid@example.com');
+  await google.getByRole('button', { name: /^next$/i }).click();
+
+  // Password step — IMPORTANT: only target the visible field
+  const pass = google.locator('input[name="Passwd"]:visible');
+  await pass.waitFor({ state: 'visible', timeout: 15000 });
+  await pass.fill('wrong-password');
+
+  await google.getByRole('button', { name: /^next$/i }).click();
+
+  // Expect validation message
+  await expect(
+    google.getByText(/wrong password|try again|couldn’t sign you in|enter a password/i)
+  ).toBeVisible();
 });
-
