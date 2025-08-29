@@ -4,7 +4,7 @@ export class HomePage {
   constructor(private page: Page) {}
 
   async gotoForexMarkets() {
-    await this.page.goto('https://tradenation.com/en-bs/markets/#forex', { waitUntil: 'domcontentloaded' });
+    await this.page.goto('https://tradenation.com/en-gb/markets/#forex', { waitUntil: 'domcontentloaded' });
   }
 
   async acceptCookiesIfVisible() {
