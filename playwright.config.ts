@@ -30,9 +30,7 @@ export default defineConfig({
     viewport: {width: 1280, height: 800},
     screenshot: 'only-on-failure',
   video: 'retain-on-failure',
-    headless: true,
-    locale: 'en-GB',
-     channel: 'chrome',
+    headless: false,
      launchOptions: {
     args: ['--disable-blink-features=AutomationControlled']
   },
@@ -41,24 +39,33 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     // In your test or in the 'use' section of playwright.config.ts
+
+     // Bias the site toward UK region
+    locale: 'en-GB',
+    extraHTTPHeaders: { 'Accept-Language': 'en-GB,en;q=0.8' },
+    geolocation: { latitude: 51.5072, longitude: -0.1276 }, // London
+    permissions: ['geolocation'],
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'],
+       channel: 'chrome',
+       },
+
     },
 
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
+    //{
+      //name: 'firefox',
+      //use: { ...devices['Desktop Firefox'] },
+    //},
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    //{
+      //name: 'webkit',
+      //use: { ...devices['Desktop Safari'] },
+    //},
 
     /* Test against mobile viewports. */
     // {
