@@ -11,7 +11,7 @@ test.describe('Trade Nation Home Page', () => {
    await home.clickTradeNationLogo();
 
 await expect(page).toHaveURL(
-  /^https:\/\/(?:www\.)?tradenation\.com\/en-[a-z]{2}\/?(?:\?.*)?$/,
+  "https://tradenation.com/en-bs/markets/#forex",
   { timeout: 15000 }
 );
 

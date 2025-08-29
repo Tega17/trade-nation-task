@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const isCI = !!process.env.CI;
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -30,7 +31,7 @@ export default defineConfig({
     viewport: {width: 1280, height: 800},
     screenshot: 'only-on-failure',
   video: 'retain-on-failure',
-    headless: false,
+    headless: true,
      launchOptions: {
     args: ['--disable-blink-features=AutomationControlled']
   },
@@ -52,7 +53,7 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'],
-       channel: 'chrome',
+       ...(isCI ? {} : { channel: 'chrome' })
        },
 
     },
