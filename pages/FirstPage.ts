@@ -5,60 +5,79 @@ export class FirstPage {
   constructor(private page: Page) {}
 
   async goto() {
-    // Force en-GB and desktop header
     await this.page.goto('https://tradenation.com/en-gb', { waitUntil: 'domcontentloaded' });
     await this.acceptCookiesIfVisible();
     await this.closeRegionModalIfPresent();
   }
 
   private async acceptCookiesIfVisible() {
-    // Handles various cookie banners
-    const cookieBtns = this.page.locator([
-      'role=button[name=/accept all|accept|agree/i]',
-      '[data-testid*="cookie"] button',
-      'button:has-text("Accept")',
-      'button:has-text("Accept all")',
-    ].join(', '));
-    if (await cookieBtns.first().isVisible()) {
-      await cookieBtns.first().click().catch(() => {});
+    // Try a few common buttons, one by one (no mixed-engine comma selectors)
+    const candidates = [
+      this.page.getByRole('button', { name: /accept all/i }),
+      this.page.getByRole('button', { name: /accept/i }),
+      this.page.getByRole('button', { name: /agree/i }),
+      this.page.locator('[data-testid*="cookie"] button'),
+      this.page.locator('button:has-text("Accept all")'),
+      this.page.locator('button:has-text("Accept")'),
+    ];
+
+    for (const loc of candidates) {
+      const btn = loc.first();
+      if (await btn.isVisible().catch(() => false)) {
+        await btn.click({ timeout: 5000 }).catch(() => {});
+        break;
+      }
     }
   }
 
   private async closeRegionModalIfPresent() {
-    const regionBtn = this.page.getByRole('button', { name: /continue|go to.*uk|en-gb|stay here/i });
-    if (await regionBtn.isVisible()) await regionBtn.click().catch(() => {});
+    const candidates = [
+      this.page.getByRole('button', { name: /continue/i }),
+      this.page.getByRole('button', { name: /go to.*uk|en-gb|stay here/i }),
+    ];
+    for (const loc of candidates) {
+      const btn = loc.first();
+      if (await btn.isVisible().catch(() => false)) {
+        await btn.click().catch(() => {});
+        break;
+      }
+    }
   }
 
   async clickSignUpOrLogin() {
-    // Open the login/signup entry point in the header
     await this.page.waitForLoadState('domcontentloaded');
 
-    // Some headers collapse on smaller viewports—open menu if needed
-    const menuBtn = this.page.getByRole('button', { name: /menu|open menu|hamburger/i });
-    if (await menuBtn.isVisible()) await menuBtn.click().catch(() => {});
+    // If header collapses, open menu
+    const menu = this.page.getByRole('button', { name: /menu|open menu|hamburger/i }).first();
+    if (await menu.isVisible().catch(() => false)) await menu.click().catch(() => {});
 
-    const trigger = this.page.locator([
-      'role=link[name=/sign up.*log in|log in|sign in|sign up/i]',
-      'role=button[name=/log in|sign in|sign up/i]',
-      'a[href*="/login"]',
-      'a[href*="/sign-in"]',
-      'a[href*="/signin"]',
-    ].join(', ')).first();
+    // Try multiple possible triggers — sequentially
+    const triggers = [
+      this.page.getByRole('link', { name: /sign up.*log in|log in|sign in|sign up/i }),
+      this.page.getByRole('button', { name: /log in|sign in|sign up/i }),
+      this.page.locator('a[href*="/login"]'),
+      this.page.locator('a[href*="/sign-in"], a[href*="/signin"]'),
+    ];
 
-    await trigger.waitFor({ state: 'visible', timeout: 10000 });
-    await trigger.click();
+    let clicked = false;
+    for (const t of triggers) {
+      const el = t.first();
+      if (await el.isVisible().catch(() => false)) {
+        await el.click();
+        clicked = true;
+        break;
+      }
+    }
+    if (!clicked) {
+      throw new Error('Login trigger not found');
+    }
 
-    // If a modal opens, wait for auth options to appear
-    await this.page.waitForTimeout(300); // small settle
-    await expect(
-      this.page.getByRole('button', { name: /google|continue with google/i }).first()
-    ).toBeVisible({ timeout: 10000 });
+    await expect(this.page.getByRole('button', { name: /google|continue with google/i }).first())
+      .toBeVisible({ timeout: 10000 });
   }
 
   async clickContinueWithGoogle() {
     const btn = this.page.getByRole('button', { name: /google|continue with google/i }).first();
-    await btn.waitFor({ state: 'visible', timeout: 10000 });
     await btn.click();
   }
 }
-
