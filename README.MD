@@ -49,7 +49,8 @@ trade-nation-playwright/
 │   ├── GoogleInvalidLogin.spec.ts      # Negative test cases
 ├── pages/
 │   ├── HomePage.ts                     # Page object for homepage
-│   ├── LoginPage.ts                    # Page object for login page
+│   ├── AuthPage.ts
+    ├── GoogleAuthPage.ts                     # Page object for login page
 ├── .github/
 │   └── workflows/
 │       └── playwright.yml              # GitHub Actions workflow file
@@ -60,8 +61,8 @@ trade-nation-playwright/
 
 ## Installation
 1. Clone the Repository
-git clone https://github.com/<your-username>/trade-nation-playwright.git
-cd trade-nation-playwright
+git clone https://github.com/Tega17/trade-nation-task.git
+cd trade-nation-task
 
 2. Install Dependencies
 
